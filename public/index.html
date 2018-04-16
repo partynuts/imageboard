@@ -1,10 +1,28 @@
 <!doctype html>
 <html>
+
 <head>
-    <title></title>
+  <title>Pari's Image-Board</title>
 </head>
+
 <body>
-    <script src="/js/vue.js"></script>
-    <script src="/js/axios.min.js"></script>
+  <style media="screen">
+    .heading {
+      color: tomato;
+    }
+  </style>
+  <div id="main">
+    <!-- <h1v-on:mouseover="myMouseover()">Hello, {{greetee || "World"}}</h1> -->
+    <ul v-if="cities && cities.length > 0" v-bind:title="title">
+      <liv-for="city in cities"> {{city.name}}, {{city.country}}</li>
+    </ul>
+
+  </div>
+  <script src="/js/vue.js"></script>
+  <script src="/js/axios.min.js"></script>
+  <script src="/js/script.js" type="text/javascript"></script>
 </body>
+
 </html>
+
+<!-- No Jquery use bc of vue -->
