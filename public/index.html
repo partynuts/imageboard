@@ -2,22 +2,48 @@
 <html>
 
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- <link rel="icon" href="pr.png" type="image/x-icon"> -->
+  <link rel="stylesheet" href="stylesheet.css">
   <title>Pari's Image-Board</title>
 </head>
 
 <body>
-  <style media="screen">
-    .heading {
-      color: tomato;
-    }
-  </style>
-  <div id="main">
-    <!-- <h1v-on:mouseover="myMouseover()">Hello, {{greetee || "World"}}</h1> -->
-    <ul v-if="cities && cities.length > 0" v-bind:title="title">
-      <liv-for="city in cities"> {{city.name}}, {{city.country}}</li>
-    </ul>
+
+  <!-- <div class="logIn">
+    <label >Title <input type="text" name="title" > </label>
+    <label >Description <input type="text" name="description" > </label>
+    <label id="username">Username <input type="username" name="username" > </label>
+    <label id="file">Choose File <input type="file" name="file" v-on:change="setFile"></label>
+      <button name="button" v-on:click="upload">Upload</button>
+  </div> -->
+
+  <div class="base">
+    <div v-if="images.length > 0">
+      <!-- v-if ist ein if-statement-->
+      <div id="main">
+        <div class="login">
+          <label>Title <input v-model="title" type="text" name="title"> </label>
+          <label>Description <input v-model="description" type="text" name="description"> </label>
+          <label id="username">Username <input v-model="username" type="username" name="username"> </label>
+          <input type="file" name="file" v-on:change="setFile">
+          <button name="button" v-on:click="upload">Upload</button>
+        </div>
+        <div class="img" v-for="image in images">
+          <!-- v-for ist ein for-loop-->
+          <!--das image ist das einzelne image aus dem Array images. Kann ich auch anders benennen, z.B. item oder pic.... -->
+          <img v-bind:src="image.url"> <a v-bind:href="image.url">{{image.title}}</a>
+          <!-- v-bind ist immer bei der src Angabe vorzutragen-->
+
+        </div>
+      </div>
+    </div>
 
   </div>
+  <!-- <h1v-on:mouseover="myMouseover()">Hello, {{greetee || "World"}}</h1> -->
+
+  </>
   <script src="/js/vue.js"></script>
   <script src="/js/axios.min.js"></script>
   <script src="/js/script.js" type="text/javascript"></script>
