@@ -10,19 +10,13 @@
 </head>
 
 <body>
-
-  <!-- <div class="logIn">
-    <label >Title <input type="text" name="title" > </label>
-    <label >Description <input type="text" name="description" > </label>
-    <label id="username">Username <input type="username" name="username" > </label>
-    <label id="file">Choose File <input type="file" name="file" v-on:change="setFile"></label>
-      <button name="button" v-on:click="upload">Upload</button>
-  </div> -->
+  <h1>Image Board reloaded</h1>
 
   <div class="base">
     <div v-if="images.length > 0">
       <!-- v-if ist ein if-statement-->
       <div id="main">
+
         <div class="login">
           <label>Title <input v-model="title" type="text" name="title"> </label>
           <label>Description <input v-model="description" type="text" name="description"> </label>
@@ -30,20 +24,54 @@
           <input type="file" name="file" v-on:change="setFile">
           <button name="button" v-on:click="upload">Upload</button>
         </div>
-        <div class="img" v-for="image in images">
+        <div class="flexContainer">
+
+          <div class="img" v-for="image in images">
           <!-- v-for ist ein for-loop-->
           <!--das image ist das einzelne image aus dem Array images. Kann ich auch anders benennen, z.B. item oder pic.... -->
-          <img v-bind:src="image.url"> <a v-bind:href="image.url">{{image.title}}</a>
+          <img v-on:click="showModal (image.id)" v-bind:src="image.url"> <a v-bind:href="image.url">{{image.title}}</a>
           <!-- v-bind ist immer bei der src Angabe vorzutragen-->
-
         </div>
+        </div>
+        <image-modal v-if="currentImgId" v-bind:current-img-id="currentImgId" v-on:close="currentImgId = null"></image-modal>
+
       </div>
     </div>
 
   </div>
   <!-- <h1v-on:mouseover="myMouseover()">Hello, {{greetee || "World"}}</h1> -->
 
-  </>
+  <script id="imgModalTmpl" type="text/x-template">
+    <div id="modal">
+      <div class="modalContainer">
+        <div class="modalClose">
+          <button class="modal-button" v-on:click='close'>OK</button>
+        </div>
+        <div class="modalbody">
+          <img class="imgsmall" v-bind:src="image">
+          <p>{{title}}</p>
+          <p>{{description}}</p>
+          <p>Contributed by {{username}} on {{created_at}}</p>
+        </div>
+        <div class="comments">
+          <div class="comwrapper">
+            <div class="allComments" v-for="comment in comments">
+              <p> {{comment.username}}</p>
+              <p> {{comment.comment}} on {{comment.created_at}}</p>
+            </div>
+            </div>
+
+            <div class="addComment">
+              <label>Username <input class="modalInput" v-model="newusername" type="username" name="username"> </label>
+              <label>Comment <textarea class="modalInput" v-model="newcomment" type="text" name="comment"></textarea> </label>
+              <button class="modalInput" v-on:click="comment">Submit comment</button>
+            </div>
+        </div>
+      </div>
+
+    </div>
+  </script>
+
   <script src="/js/vue.js"></script>
   <script src="/js/axios.min.js"></script>
   <script src="/js/script.js" type="text/javascript"></script>

@@ -33,6 +33,7 @@ exports.upload = function(req, res, next) {
     console.log(wasSuccessful);
     if (wasSuccessful) {
       next();
+      fs.unlink(req.file.path, () => null) //delete pics from harddrive after uploading to amazon. and pass the unlink an empty function. this function is called noop!
     } else {
       res.sendStatus(500);
     }

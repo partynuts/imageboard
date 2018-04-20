@@ -3,7 +3,13 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-const { displayImages, insertImageData } = require("./db");
+const {
+  displayImages,
+  insertImageData,
+  displayComments,
+  imageModal,
+  insertComments
+} = require("./db");
 
 const multer = require("multer");
 const uidSafe = require("uid-safe");
@@ -76,5 +82,64 @@ app.post("/upload", uploader.single("file"), s3.upload, function(req, res) {
     });
   }
 });
+
+// var r2 = new Dateresult.rows[i].created_at
+// r2.toLocaleDateString();
+
+app.get("/comments/:currentImgId", function(req, res) {
+  const curImgId = req.params.currentImgId;
+  imageModal(curImgId)
+    .then(function(results) {
+      console.log(results.rows);
+      results.rows.forEach(item => {
+          let date = new Date (item.created_at);
+          console.log(date.toLocaleDateString());
+            item.created_at = date.toLocaleDateString();
+      });
+      console.log(results);
+      displayComments(curImgId)
+      .then(function(result) {
+        console.log(result);
+        result.rows.forEach(item => {
+            let date = new Date (item.created_at);
+            console.log(date.toLocaleDateString());
+              item.created_at = date.toLocaleDateString();
+        });
+          res.json({ images: results.rows[0], comments: result.rows });
+
+      })
+      .catch(e => {
+        console.log(e);
+      });
+    })
+    .catch(e => {
+      console.log(e);
+    });
+});
+
+app.post("/comment", function(req, res) {
+const {comment, user, curImgId} = req.body;
+console.log(comment, user, curImgId);
+  if (comment, user) {
+    insertComments(comment, user, curImgId)
+    .then(function( results) {
+        console.log(results);
+      res.json({
+        success: true,
+        comments: results.rows[0]
+      });
+    }).catch(e => {
+      console.log(e);
+    });
+  } else {
+    console.log("boo!");
+    res.json({
+      success: false
+    });
+
+  }
+});
+
+
 
 app.listen(8080, () => console.log("listening to port 8080 ImageBoard"));
