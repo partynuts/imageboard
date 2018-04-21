@@ -10,7 +10,7 @@
 </head>
 
 <body>
-  <h1>Image Board reloaded</h1>
+  <h2>Image Board reloaded</h2>
 
   <div class="base">
     <div v-if="images.length > 0">
@@ -23,17 +23,30 @@
           <label id="username">Username <input v-model="username" type="username" name="username"> </label>
           <input type="file" name="file" v-on:change="setFile">
           <button name="button" v-on:click="upload">Upload</button>
+          <span  v-if="error" class="err">{{errmessage}}</span>
         </div>
-        <div class="flexContainer">
 
-          <div class="img" v-for="image in images">
-          <!-- v-for ist ein for-loop-->
+        <div class="flexContainer">
+          <!-- <div class="imgCont"> -->
+            <div class="img" v-for="image in images">
+              <div class="likes" >
+                <button class="likeBtn" @click="like" > <img class="like" src="heart.svg.png" alt=""></button>
+                <span v-bind:like-id="image.id" class="like">{{counter}}</span>
+              </div>
+                        <!-- v-for ist ein for-loop-->
           <!--das image ist das einzelne image aus dem Array images. Kann ich auch anders benennen, z.B. item oder pic.... -->
-          <img v-on:click="showModal (image.id)" v-bind:src="image.url"> <a v-bind:href="image.url">{{image.title}}</a>
+            <a v-bind:href="'#' + image.id">
+            <img class="bigImg"  v-bind:src="image.url" title="click to comment">
+            </a>
+            <p> <a v-bind:href="image.url" title="see full-size image"> {{image.title}} </a> </p>
+
           <!-- v-bind ist immer bei der src Angabe vorzutragen-->
+            <!-- </div> -->
+          </div>
         </div>
-        </div>
-        <image-modal v-if="currentImgId" v-bind:current-img-id="currentImgId" v-on:close="currentImgId = null"></image-modal>
+        <button class="moreButton" v-if="morePix" @click="moreButton">Load more</button>
+
+        <image-modal v-if="currentImgId" v-bind:current-img-id="currentImgId" v-on:closemodal="closeModal"></image-modal>
 
       </div>
     </div>
@@ -43,15 +56,18 @@
 
   <script id="imgModalTmpl" type="text/x-template">
     <div id="modal">
+
       <div class="modalContainer">
         <div class="modalClose">
-          <button class="modal-button" v-on:click='close'>OK</button>
+          <button class="closeButton" v-on:click='close'>Close</button>
         </div>
         <div class="modalbody">
           <img class="imgsmall" v-bind:src="image">
-          <p>{{title}}</p>
-          <p>{{description}}</p>
-          <p>Contributed by {{username}} on {{created_at}}</p>
+          <div class="cred">
+            <p class="imgDesc">{{title}}</p>
+            <p class="imgDesc">{{description}}</p>
+            <p class="imgDesc uploadBy">Contributed by {{username}} on {{created_at}}</p>
+          </div>
         </div>
         <div class="comments">
           <div class="comwrapper">
@@ -62,9 +78,11 @@
             </div>
 
             <div class="addComment">
-              <label>Username <input class="modalInput" v-model="newusername" type="username" name="username"> </label>
-              <label>Comment <textarea class="modalInput" v-model="newcomment" type="text" name="comment"></textarea> </label>
-              <button class="modalInput" v-on:click="comment">Submit comment</button>
+
+              <label>Username <input class="modalInput" v-model="newusername" type="username" name="username" > </label>
+              <label>Comment <textarea class="modalInput" v-model="newcomment" type="text" name="comment" ></textarea> </label>
+              <span  v-if="error" class="err">{{errmessage}}</span>
+              <button id="addComButton"  v-on:click="comment">Submit comment</button>
             </div>
         </div>
       </div>

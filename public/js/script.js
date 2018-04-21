@@ -7,7 +7,7 @@
     //create a new Vue instance which is slitely different
     // to the Vue instance. You don't give it an el, bc components create their own element!
     data: function() {
-      //forcomponents yoou want data to be a function, not an object.
+      //for components yoou want data to be a function, not an object.
       return {
         title: "",
         username: "",
@@ -16,62 +16,63 @@
         image: "",
         comments: [],
         newcomment: '',
-        newusername: ''
+        newusername: '',
+        error: false,
+        errmessage: ""
       };
     },
     mounted: function() {
-      var self = this;
-      axios.get("/comments/" + self.currentImgId).then(function(response) {
-        //get one image for commenting
-        console.log(response);
-        self.title = response.data.images.title;
-        self.username = response.data.images.username;
-        self.description = response.data.images.description;
-        self.created_at = response.data.images.created_at;
-        self.image = response.data.images.url;
-        for (let i = 0; i < response.data.comments.length; i++) {
-        self.comments.unshift(response.data.comments[i]);
-        console.log(self.comments[0].comment);
-        }
-      });
+      this.mounter();
     },
-
+   watch: {currentImgId: function() {
+     this.mounter();
+   }},
     props: ["currentImgId"],
     methods: {
-      open: function(e) {
-        this.$emit("open", this.id, e.target.value);
+      mounter: function() {
         var self = this;
-        axios.post("/open", modalData).then(function(resp) {
-          var modalData = new modalData();
-
-          if (resp.data.success) {
-            self.images.unshift(resp.data.images[0]);
-            console.log(self.images);
+        axios.get("/comments/" + self.currentImgId).then(function(response) {
+          //get one image for commenting
+          console.log(response);
+          self.title = response.data.images.title;
+          self.username = response.data.images.username;
+          self.description = response.data.images.description;
+          self.created_at = response.data.images.created_at;
+          self.image = response.data.images.url;
+          for (let i = 0; i < response.data.comments.length; i++) {
+          self.comments.unshift(response.data.comments[i]);
+          console.log(self.comments[0].comment);
+          console.log("kommentiere:", self.comments[0].created_at);
           }
         });
       },
+
       close: function(e) {
-        this.$emit("close", this.currentImgId);
+        this.$emit("closemodal", this.currentImgId);
         console.log('closing');
       },
       comment: function() {
-        // var formData = new FormData();
-        // formData.append("username", this.username);
-        // formData.append("comment", this.comment);
         console.log('comment sending fn firing');
         var self = this;
         axios.post("/comment", {
+
           comment: this.newcomment,
           user: this.newusername,
           curImgId: this.currentImgId
-        }).then(function(resp) {
+        })
+        .then(function(resp) {
 
           if (resp.data.success) {
-            console.log("Response Data:",resp);
-            self.comments.unshift(resp.data.comments);
 
-              // console.log ("response data:", resp.data.comments[0].comment);
-            // }
+            console.log("Response Data:",resp);
+            console.log("err before",self.error);
+            self.comments.unshift(resp.data.comments);
+            self.newcomment = "";
+            self.newusername = "";
+
+          } else {
+            self.error = true;
+            self.errmessage = "Please fill out all fields."
           }
         });
       },
@@ -83,29 +84,74 @@
   new Vue({
     //parent
     el: "#main",
-
     data: {
       title: "",
       username: "",
       description: "",
       file: null,
       images: [],
-      currentImgId: null
+      morePix: true,
+      currentImgId: location.hash.slice(1),
+      error: false,
+      errmessage: "",
+      counter: 0
     },
     mounted: function() {
       console.log("mounted happened");
       var self = this; //this funktioniert hier wegen des Scopes nicht. deshalb muss man es als variable definieren
-      axios.get("/images").then(function(response) {
-        console.log(response);
-        for (var i = 0; i < response.data.images.length; i++) {
-          //data ist bei vue wie rows bei sql-das ist immer das, was uns interessiert und wir ausgegeben haben wollen
-          //images = das images-Array oben in meinem data-Objekt
-          console.log(self.images);
-          self.images.push(response.data.images[i]);
-        }
+
+      window.addEventListener('hashchange', function() {
+        console.log('event listener firing');
+        console.log("curImgId",self.currentImgId);
+      self.currentImgId = location.hash.slice(1);
+      console.log("curImgId before",self.currentImgId);
+
       });
+
+      axios.get('/images').then((response) => {
+                 self.lastImgId = response.data.lastImgId;
+                 self.images = response.data.images;
+
+             });
+
+             self.$on('images.added', (image) => {
+                 self.images.unshift(image);
+                     //more code
+             })
+
     },
     methods: {
+
+        moreButton: function () {
+          var self = this;
+            // if(!self.moreImgsFetched) {
+              console.log("drinnen");
+                axios.get('/imagesMore', {
+                    params: {
+                    id: self.lastImgId
+                  }
+                }).then((response) => {
+                  if(response.data.morePix==false) {
+                    self.morePix = false;
+                  }
+                  self.lastImgId = response.data.lastImgId;
+
+                    self.images = self.images.concat(response.data.images);
+                    console.log(self.images);
+
+                });
+            // }
+
+        },
+      like: function(likeId) {
+        console.log("this.images.id",this.images);
+        for (let i = 0; i< this.images.length; i++ ) {
+          this.images[i].id = likeId;
+          console.log(  this.images[4].id);
+        }
+        this.counter++;
+        },
+
       setFile: function(e) {
         this.file = e.target.files[0];
         // console.log(this.title, this.description, this.username, e.target.files[0]);
@@ -122,13 +168,21 @@
           if (resp.data.success) {
             self.images.unshift(resp.data.images[0]);
             console.log(self.images);
+          } else {
+            self.error = true;
+            self.errmessage = "Please fill out all fields."
           }
         });
+      },
+      closeModal: function() {
+        this.currentImgId = null;
+        window.location.hash = '';
       },
 
       showModal: function(id) {
         this.currentImgId = id;
       }
+
     }
   });
 })();

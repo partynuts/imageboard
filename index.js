@@ -8,7 +8,8 @@ const {
   insertImageData,
   displayComments,
   imageModal,
-  insertComments
+  insertComments,
+  displayMoreImages
 } = require("./db");
 
 const multer = require("multer");
@@ -45,7 +46,30 @@ app.use(express.static("./public"));
 
 app.get("/images", function(req, res) {
   displayImages().then(function(results) {
-    res.json({ images: results.rows }); //sending the info from server to client
+    let lastImg = results.rows[results.rows.length-1].id;
+    res.json({ images: results.rows, lastImgId: lastImg }); //sending the info from server to client
+  });
+});
+
+app.get('/imagesMore', function(req, res) {
+  // console.log(imgId);
+  let imgId = req.query.id;
+  console.log('disp more img');
+  displayMoreImages(imgId).then(function(results) {
+    let lastImg = results.rows[results.rows.length-1].id;
+    if (results.rows[results.rows.length-1].id == 1) {
+      res.json(
+        {morePix: false,
+        images: results.rows
+    })
+    } else {
+      res.json(
+        {
+          images: results.rows,
+          morePix: true,
+          lastImgId: lastImg
+        }); //sending the info from server to client
+    }
   });
 });
 
@@ -56,7 +80,9 @@ app.post("/upload", uploader.single("file"), s3.upload, function(req, res) {
   //the name 'file' is dependent on the name of the field you appended to the form data
   // If nothing went wrong the file is already in the uploads directory
   console.log("req.body:", req.body, "req.file:", req.file);
-  if (req.file) {
+  const {title, description, username} = req.body;
+  console.log(title);
+  if ( title && description && username && req.file) {
     console.log("success!", req.file, "req.body:", req.body);
     const imageUrl = config.s3Url + req.file.filename;
     insertImageData(
@@ -68,7 +94,8 @@ app.post("/upload", uploader.single("file"), s3.upload, function(req, res) {
       console.log(result);
       res.json({
         success: true,
-        images: result.rows
+        images: result.rows,
+        error: false
         // data: {
         //   url: myAmazonUrl +  req.file.filename,
         // title: req.body.title
@@ -78,7 +105,9 @@ app.post("/upload", uploader.single("file"), s3.upload, function(req, res) {
   } else {
     console.log("boo!");
     res.json({
-      success: false
+      success: false,
+      error: true,
+      errmessage: ""
     });
   }
 });
@@ -104,9 +133,12 @@ app.get("/comments/:currentImgId", function(req, res) {
             let date = new Date (item.created_at);
             console.log(date.toLocaleDateString());
               item.created_at = date.toLocaleDateString();
+              console.log(item.created_at);
         });
-          res.json({ images: results.rows[0], comments: result.rows });
-
+          res.json({
+            images: results.rows[0],
+            comments: result.rows
+          });
       })
       .catch(e => {
         console.log(e);
@@ -119,13 +151,16 @@ app.get("/comments/:currentImgId", function(req, res) {
 
 app.post("/comment", function(req, res) {
 const {comment, user, curImgId} = req.body;
+// let err = {error: "Please fill out all fields."};
+
 console.log(comment, user, curImgId);
-  if (comment, user) {
+  if (comment && user) {
     insertComments(comment, user, curImgId)
     .then(function( results) {
-        console.log(results);
+        // console.log("result for comment app post", results);
       res.json({
         success: true,
+        error: false,
         comments: results.rows[0]
       });
     }).catch(e => {
@@ -134,10 +169,12 @@ console.log(comment, user, curImgId);
   } else {
     console.log("boo!");
     res.json({
-      success: false
+      success: false,
+      error: true,
+      errmessage: ""
     });
-
   }
+
 });
 
 

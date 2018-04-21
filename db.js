@@ -9,11 +9,17 @@ if (process.env.DATABASE_URL) {
 
 function displayImages(url, title) {
   return db
-  .query(`SELECT * FROM images ORDER BY id DESC`)
+  .query(`SELECT * FROM images ORDER BY id DESC LIMIT 6`)
 }
 
 exports.displayImages = displayImages;
 
+function displayMoreImages(lastImgId ) {
+  return db
+  .query(`SELECT * FROM images WHERE id<$1 ORDER BY id DESC LIMIT 6`, [lastImgId])
+}
+
+exports.displayMoreImages = displayMoreImages;
 
 function insertImageData(url, title, username, description) {
   return db
