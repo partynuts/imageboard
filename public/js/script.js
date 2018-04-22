@@ -15,23 +15,29 @@
         created_at: "",
         image: "",
         comments: [],
-        newcomment: '',
-        newusername: '',
+        newcomment: "",
+        newusername: "",
         error: false,
-        errmessage: ""
+        errmessage: "",
+        counter: 0,
+        disabled: false,
+        totalLikes: "",
       };
     },
     mounted: function() {
       this.mounter();
     },
-   watch: {currentImgId: function() {
-     this.mounter();
-   }},
+    watch: {
+      currentImgId: function() {
+        this.mounter();
+      }
+    },
     props: ["currentImgId"],
     methods: {
       mounter: function() {
         var self = this;
-        axios.get("/comments/" + self.currentImgId).then(function(response) {
+        axios.get("/comments/" + self.currentImgId)
+        .then(function(response) {
           //get one image for commenting
           console.log(response);
           self.title = response.data.images.title;
@@ -40,43 +46,68 @@
           self.created_at = response.data.images.created_at;
           self.image = response.data.images.url;
           for (let i = 0; i < response.data.comments.length; i++) {
-          self.comments.unshift(response.data.comments[i]);
-          console.log(self.comments[0].comment);
-          console.log("kommentiere:", self.comments[0].created_at);
+            self.comments.unshift(response.data.comments[i]);
+            console.log(self.comments[0].comment);
+            console.log("kommentiere:", self.comments[0].created_at);
           }
         });
       },
 
       close: function(e) {
         this.$emit("closemodal", this.currentImgId);
-        console.log('closing');
+        console.log("closing");
       },
       comment: function() {
-        console.log('comment sending fn firing');
+        console.log("comment sending fn firing");
         var self = this;
         axios.post("/comment", {
-
-          comment: this.newcomment,
-          user: this.newusername,
-          curImgId: this.currentImgId
-        })
-        .then(function(resp) {
-
-          if (resp.data.success) {
-
-            console.log("Response Data:",resp);
-            console.log("err before",self.error);
-            self.comments.unshift(resp.data.comments);
-            self.newcomment = "";
-            self.newusername = "";
-
-          } else {
-            self.error = true;
-            self.errmessage = "Please fill out all fields."
-          }
-        });
+            comment: this.newcomment,
+            user: this.newusername,
+            curImgId: this.currentImgId
+          })
+          .then(function(resp) {
+            if (resp.data.success) {
+              console.log("Response Data:", resp);
+              console.log("err before", self.error);
+              self.comments.unshift(resp.data.comments);
+              self.newcomment = "";
+              self.newusername = "";
+            } else {
+              self.error = true;
+              self.errmessage = "Please fill out all fields.";
+            }
+          });
       },
+      like: function(likeId) {
+        // console.log("this.images", this.images);
+        // console.log("this.images.image.id", this.images[0].id);
+        console.log("this.currentImgId", this.currentImgId);
 
+        this.disabled = true;
+        var self = this;
+        self.counter++;
+        console.log("self.currentImgId", self.currentImgId);
+        axios.post("/like", {
+            likes: 1,
+            curImgId: this.currentImgId,
+            disabled: this.disabled
+          })
+          .then(function(response) {
+            if (response.data.success) {
+              axios.get("/likes/" + self.currentImgId)
+              .then(function(resp) {
+                console.log("response for likes:", resp);
+
+                self.totalLikes = resp.data.totalLikes[0].total;
+
+              })
+              console.log(response);
+            }
+          })
+          .catch(e => {
+            console.log(e);
+          });
+      }
     },
     template: "#imgModalTmpl"
   });
@@ -93,64 +124,72 @@
       morePix: true,
       currentImgId: location.hash.slice(1),
       error: false,
-      errmessage: "",
-      counter: 0
+      errmessage: ""
+      // counter: 0,
+      // disabled:false
     },
     mounted: function() {
       console.log("mounted happened");
       var self = this; //this funktioniert hier wegen des Scopes nicht. deshalb muss man es als variable definieren
 
-      window.addEventListener('hashchange', function() {
-        console.log('event listener firing');
-        console.log("curImgId",self.currentImgId);
-      self.currentImgId = location.hash.slice(1);
-      console.log("curImgId before",self.currentImgId);
-
+      window.addEventListener("hashchange", function() {
+        self.currentImgId = location.hash.slice(1);
       });
 
-      axios.get('/images').then((response) => {
-                 self.lastImgId = response.data.lastImgId;
-                 self.images = response.data.images;
+      axios.get("/images").then(response => {
+        self.lastImgId = response.data.lastImgId;
+        self.images = response.data.images;
+      });
 
-             });
-
-             self.$on('images.added', (image) => {
-                 self.images.unshift(image);
-                     //more code
-             })
-
+      self.$on("images.added", image => {
+        self.images.unshift(image);
+        //more code
+      });
     },
     methods: {
+      moreButton: function() {
+        var self = this;
+        // if(!self.moreImgsFetched) {
+        console.log("drinnen");
+        axios
+          .get("/imagesMore", {
+            params: {
+              id: self.lastImgId
+            }
+          })
+          .then(response => {
+            if (response.data.morePix == false) {
+              self.morePix = false;
+            }
+            self.lastImgId = response.data.lastImgId;
 
-        moreButton: function () {
-          var self = this;
-            // if(!self.moreImgsFetched) {
-              console.log("drinnen");
-                axios.get('/imagesMore', {
-                    params: {
-                    id: self.lastImgId
-                  }
-                }).then((response) => {
-                  if(response.data.morePix==false) {
-                    self.morePix = false;
-                  }
-                  self.lastImgId = response.data.lastImgId;
-
-                    self.images = self.images.concat(response.data.images);
-                    console.log(self.images);
-
-                });
-            // }
-
-        },
-      like: function(likeId) {
-        console.log("this.images.id",this.images);
-        for (let i = 0; i< this.images.length; i++ ) {
-          this.images[i].id = likeId;
-          console.log(  this.images[4].id);
-        }
-        this.counter++;
-        },
+            self.images = self.images.concat(response.data.images);
+            console.log(self.images);
+          });
+        // }
+      },
+      // like: function(likeId) {
+      //   console.log("this.images", this.images);
+      //   console.log("this.images.image.id", this.images[0].id);
+      //   console.log("this.currentImgId", this.currentImgId);
+      //
+      //   this.disabled=true;
+      //   var self = this;
+      //   console.log("self.currentImgId", self.currentImgId);
+      //   axios.post('/likes/'+ this.images.id, {
+      //     likes: self.counter,
+      //     curImgId: this.currentImgId
+      //   })
+      //   .then(function (response) {
+      //     if (response.data.success) {
+      //       self.counter++;
+      //       console.log(response);
+      //     }
+      //   })
+      //   .catch(e => {
+      //     console.log(e);
+      //   })
+      // },
 
       setFile: function(e) {
         this.file = e.target.files[0];
@@ -168,21 +207,24 @@
           if (resp.data.success) {
             self.images.unshift(resp.data.images[0]);
             console.log(self.images);
+            self.title = "";
+            self.username = "";
+            self.description = "";
+            self.file = null;
           } else {
             self.error = true;
-            self.errmessage = "Please fill out all fields."
+            self.errmessage = "Please fill out all fields.";
           }
         });
       },
       closeModal: function() {
         this.currentImgId = null;
-        window.location.hash = '';
+        window.location.hash = "";
       },
 
       showModal: function(id) {
         this.currentImgId = id;
       }
-
     }
   });
 })();

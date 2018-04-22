@@ -9,7 +9,9 @@ const {
   displayComments,
   imageModal,
   insertComments,
-  displayMoreImages
+  displayMoreImages,
+  insertLikes,
+  displayLikes
 } = require("./db");
 
 const multer = require("multer");
@@ -112,8 +114,6 @@ app.post("/upload", uploader.single("file"), s3.upload, function(req, res) {
   }
 });
 
-// var r2 = new Dateresult.rows[i].created_at
-// r2.toLocaleDateString();
 
 app.get("/comments/:currentImgId", function(req, res) {
   const curImgId = req.params.currentImgId;
@@ -151,8 +151,6 @@ app.get("/comments/:currentImgId", function(req, res) {
 
 app.post("/comment", function(req, res) {
 const {comment, user, curImgId} = req.body;
-// let err = {error: "Please fill out all fields."};
-
 console.log(comment, user, curImgId);
   if (comment && user) {
     insertComments(comment, user, curImgId)
@@ -175,6 +173,40 @@ console.log(comment, user, curImgId);
     });
   }
 
+});
+
+app.post("/like", function(req, res) {
+  console.log("in post route for likes");
+const {likes, curImgId, disabled} = req.body;
+console.log("likes", likes, "currImgId",curImgId);
+  if (disabled == true) {
+    insertLikes(likes, curImgId)
+    .then(function( result) {
+        console.log("result for likes app post", result);
+      res.json({
+        success: true,
+        likes: result.rows
+      });
+    }).catch(e => {
+      console.log(e);
+    });
+  } else {
+    console.log("fail likes!");
+    res.json({
+      success: false,
+    });
+  }
+});
+
+app.get("/likes/:currentImgId", function(req, res) {
+  const curImgId = req.params.currentImgId;
+  displayLikes(curImgId)
+    .then(function(results) {
+      console.log("getting no. of likes:", results );
+      res.json({
+        totalLikes: results.rows
+      })
+    })
 });
 
 

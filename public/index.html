@@ -29,10 +29,10 @@
         <div class="flexContainer">
           <!-- <div class="imgCont"> -->
             <div class="img" v-for="image in images">
-              <div class="likes" >
-                <button class="likeBtn" @click="like" > <img class="like" src="heart.svg.png" alt=""></button>
-                <span v-bind:like-id="image.id" class="like">{{counter}}</span>
-              </div>
+              <!-- <div class="likes" >
+                <button class="likeBtn" @click="like" > <img class="like" src="heart.svg.png" :disabled="disabled" alt=""></button>
+                <span v-bind:currentImgId="image.id" class="like">{{counter}}</span>
+              </div> -->
                         <!-- v-for ist ein for-loop-->
           <!--das image ist das einzelne image aus dem Array images. Kann ich auch anders benennen, z.B. item oder pic.... -->
             <a v-bind:href="'#' + image.id">
@@ -75,10 +75,13 @@
               <p> {{comment.username}}</p>
               <p> {{comment.comment}} on {{comment.created_at}}</p>
             </div>
-            </div>
+          </div>
 
             <div class="addComment">
-
+              <div class="likes" >
+                <button class="likeBtn" @click="like" > <img class="like" src="heart.svg.png" :disabled="disabled" alt=""></button>
+                <span v-bind:currentImgId="image.id" class="like"> {{totalLikes}}</span>
+              </div>
               <label>Username <input class="modalInput" v-model="newusername" type="username" name="username" > </label>
               <label>Comment <textarea class="modalInput" v-model="newcomment" type="text" name="comment" ></textarea> </label>
               <span  v-if="error" class="err">{{errmessage}}</span>

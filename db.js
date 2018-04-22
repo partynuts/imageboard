@@ -58,3 +58,21 @@ function imageModal(id) {
 }
 
 exports.imageModal = imageModal;
+
+function insertLikes(likes, image_id) {
+  return db
+  .query(`INSERT INTO likes (likes, image_id)
+  VALUES ($1, $2)
+  Returning *`, [likes, image_id])
+}
+
+exports.insertLikes = insertLikes;
+
+function displayLikes(image_id) {
+  return db
+  .query(`SELECT SUM (likes) AS total
+    FROM likes
+    WHERE image_id = $1`, [image_id])
+}
+
+exports.displayLikes = displayLikes;
