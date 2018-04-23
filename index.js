@@ -119,26 +119,33 @@ app.get("/comments/:currentImgId", function(req, res) {
   const curImgId = req.params.currentImgId;
   imageModal(curImgId)
     .then(function(results) {
-      console.log(results.rows);
+      // console.log(results.rows);
       results.rows.forEach(item => {
           let date = new Date (item.created_at);
-          console.log(date.toLocaleDateString());
+          // console.log(date.toLocaleDateString());
             item.created_at = date.toLocaleDateString();
       });
-      console.log(results);
+      // console.log(results);
       displayComments(curImgId)
       .then(function(result) {
         console.log(result);
         result.rows.forEach(item => {
             let date = new Date (item.created_at);
-            console.log(date.toLocaleDateString());
+            // console.log(date.toLocaleDateString());
               item.created_at = date.toLocaleDateString();
-              console.log(item.created_at);
+              // console.log(item.created_at);
         });
+        displayLikes(curImgId)
+        .then(function(resp) {
+          console.log("dispLikes app post route",resp);
+          resp.rows;
           res.json({
             images: results.rows[0],
-            comments: result.rows
+            comments: result.rows,
+            totalLikes: resp.rows[0].total
           });
+        })
+
       })
       .catch(e => {
         console.log(e);
@@ -155,6 +162,11 @@ console.log(comment, user, curImgId);
   if (comment && user) {
     insertComments(comment, user, curImgId)
     .then(function( results) {
+      results.rows.forEach(item => {
+          let date = new Date (item.created_at);
+          console.log(date.toLocaleDateString());
+            item.created_at = date.toLocaleDateString();
+      });
         // console.log("result for comment app post", results);
       res.json({
         success: true,

@@ -11,10 +11,12 @@ body {
 
 h2 {
   text-align: center;
+  /* position: fixed; */
   /* color: #717171; */
 }
 
 .flexContainer {
+  margin-top: 8%;
   display: flex;
   justify-content: flex-start;
   align-items: flex-start;
@@ -24,13 +26,23 @@ h2 {
 }
 
 #main {
+
   max-width: 100vw;
   overflow:hidden;
 }
 
+.stickyHead {
+  top: 0;
+  position: fixed;
+  background-color: rgba(255, 240, 245, 0.90);
+}
+
 .login {
+  width: 94vw;
+  /* position: fixed; */
   grid-column: 1/4;
   font-weight: bold;
+
   -webkit-box-shadow: 0px 10px 39px 0px rgba(0, 0, 0, 0.51);
   -moz-box-shadow: 0px 10px 39px 0px rgba(0, 0, 0, 0.51);
    box-shadow: 0px 10px 39px 0px rgba(0, 0, 0, 0.51);
@@ -54,7 +66,24 @@ h2 {
   background-color: rgba(0, 0, 0, 0.06);
 }
 
+.topBtn {
+  width: 150px;
+  height: 50px;
+  border: none;
+  background-color: transparent;
+  border-radius: 999px;
+  font-weight: bold;
+  color: #717171;
+  float: right;
+}
+
+.topBtn:hover {
+  cursor: pointer;
+  background-color: rgba(0, 0, 0, 0.06);
+}
+
 .img {
+
   border-style: solid;
   border-radius: 5px;
   border-color: lavender;
@@ -73,7 +102,7 @@ h2 {
 }
 
 .bigImg {
-  max-width: 100%;
+  max-width: 90%;
   height:200px;
   border-radius: 3px;
 }
@@ -142,7 +171,7 @@ h2 {
 
 .imgsmall {
   height: 80%;
-  width: auto;
+  max-width: 95%;
   border: solid floralwhite 3px;
 }
 
@@ -269,7 +298,7 @@ vertical-align: middle;
     width: 10%;
     height: 10%;
   }
-  
+
   #main {
     display: block;
     max-width: 100vw;

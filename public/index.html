@@ -10,30 +10,29 @@
 </head>
 
 <body>
-  <h2>Image Board reloaded</h2>
+
 
   <div class="base">
     <div v-if="images.length > 0">
       <!-- v-if ist ein if-statement-->
       <div id="main">
 
-        <div class="login">
-          <label>Title <input v-model="title" type="text" name="title"> </label>
-          <label>Description <input v-model="description" type="text" name="description"> </label>
-          <label id="username">Username <input v-model="username" type="username" name="username"> </label>
-          <input type="file" name="file" v-on:change="setFile">
-          <button name="button" v-on:click="upload">Upload</button>
-          <span  v-if="error" class="err">{{errmessage}}</span>
+        <div class="stickyHead">
+          <h2>Image Board reloaded</h2>
+          <div class="login">
+            <label>Title <input v-model="title" type="text" name="title"> </label>
+            <label>Description <input v-model="description" type="text" name="description"> </label>
+            <label id="username">Username <input v-model="username" type="username" name="username"> </label>
+            <input type="file" name="file" v-on:change="setFile">
+            <button name="button" v-on:click="upload">Upload</button>
+            <span  v-if="error" class="err">{{errmessage}}</span>
+          </div>
         </div>
 
         <div class="flexContainer">
           <!-- <div class="imgCont"> -->
             <div class="img" v-for="image in images">
-              <!-- <div class="likes" >
-                <button class="likeBtn" @click="like" > <img class="like" src="heart.svg.png" :disabled="disabled" alt=""></button>
-                <span v-bind:currentImgId="image.id" class="like">{{counter}}</span>
-              </div> -->
-                        <!-- v-for ist ein for-loop-->
+          <!-- v-for ist ein for-loop-->
           <!--das image ist das einzelne image aus dem Array images. Kann ich auch anders benennen, z.B. item oder pic.... -->
             <a v-bind:href="'#' + image.id">
             <img class="bigImg"  v-bind:src="image.url" title="click to comment">
@@ -45,7 +44,7 @@
           </div>
         </div>
         <button class="moreButton" v-if="morePix" @click="moreButton">Load more</button>
-
+        <button class="topBtn" type="button" name="top" v-on:click="scrollTop">Back to top</button> 
         <image-modal v-if="currentImgId" v-bind:current-img-id="currentImgId" v-on:closemodal="closeModal"></image-modal>
 
       </div>

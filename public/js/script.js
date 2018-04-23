@@ -39,12 +39,13 @@
         axios.get("/comments/" + self.currentImgId)
         .then(function(response) {
           //get one image for commenting
-          console.log(response);
+          console.log(response.data.totalLikes);
           self.title = response.data.images.title;
           self.username = response.data.images.username;
           self.description = response.data.images.description;
           self.created_at = response.data.images.created_at;
           self.image = response.data.images.url;
+          self.totalLikes = response.data.totalLikes;
           for (let i = 0; i < response.data.comments.length; i++) {
             self.comments.unshift(response.data.comments[i]);
             console.log(self.comments[0].comment);
@@ -210,7 +211,7 @@
             self.title = "";
             self.username = "";
             self.description = "";
-            self.file = null;
+            self.input = null;
           } else {
             self.error = true;
             self.errmessage = "Please fill out all fields.";
@@ -224,6 +225,12 @@
 
       showModal: function(id) {
         this.currentImgId = id;
+      },
+      scrollTop: function() {
+        window.scrollTo({
+          top: 0,
+          behavior: "smooth"
+        });
       }
     }
   });
