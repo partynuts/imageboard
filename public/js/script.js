@@ -39,7 +39,6 @@
         axios.get("/comments/" + self.currentImgId)
         .then(function(response) {
           //get one image for commenting
-          console.log(response.data.totalLikes);
           self.title = response.data.images.title;
           self.username = response.data.images.username;
           self.description = response.data.images.description;
@@ -48,18 +47,14 @@
           self.totalLikes = response.data.totalLikes;
           for (let i = 0; i < response.data.comments.length; i++) {
             self.comments.unshift(response.data.comments[i]);
-            console.log(self.comments[0].comment);
-            console.log("kommentiere:", self.comments[0].created_at);
           }
         });
       },
 
       close: function(e) {
         this.$emit("closemodal", this.currentImgId);
-        console.log("closing");
       },
       comment: function() {
-        console.log("comment sending fn firing");
         var self = this;
         axios.post("/comment", {
             comment: this.newcomment,
